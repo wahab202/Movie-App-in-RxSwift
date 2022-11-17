@@ -15,9 +15,12 @@ class MovieListController: UIViewController {
     private var cv: UICollectionView!
     private let bag: DisposeBag
     private let vm: MovieListViewModel
+    private let coordinator: MovieListCoordinator
     
-    init(vm: MovieListViewModel = MovieListViewModel()) {
+    init(vm: MovieListViewModel = MovieListViewModel(),
+         coordinator: MovieListCoordinator = MovieListCoordinator()) {
         self.vm = vm
+        self.coordinator = coordinator
         self.bag = DisposeBag()
         
         super.init(nibName: nil, bundle: nil)
@@ -67,7 +70,9 @@ class MovieListController: UIViewController {
     }
     
     private func bindViewModel() {
-        let input = MovieListViewModel.Input()
+        let input = MovieListViewModel.Input(
+            selection: cv.rx.itemSelected.asDriver()
+        )
 
         let output = vm.transform(input: input)
 
@@ -80,10 +85,22 @@ class MovieListController: UIViewController {
             
 
         let disposables = [
-            output.sections.drive(cv.rx.items(dataSource: dataSource))
+            output.sections.drive(cv.rx.items(dataSource: dataSource)),
+            output.navigation.drive(navigationBinder)
         ]
 
         disposables.forEach { $0.disposed(by: bag) }
+    }
+    
+    private var navigationBinder: Binder<MovieListCoordinator.Route> {
+        return Binder(self) { host, route in
+            host.coordinator.navigate(to: route)
+            
+            // deselecting items in collectionCiew
+            if let selectedItems = host.cv.indexPathsForSelectedItems {
+                for indexPath in selectedItems { host.cv.deselectItem(at: indexPath, animated: true) }
+            }
+        }
     }
 }
 

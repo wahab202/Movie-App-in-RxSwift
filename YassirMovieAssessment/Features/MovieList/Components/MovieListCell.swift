@@ -68,10 +68,11 @@ final class MovieListCell: UICollectionViewCell {
             contentView.addSubview($0)
             
             NSLayoutConstraint.activate([
-                $0.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+                $0.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+                $0.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
                 $0.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-                $0.widthAnchor.constraint(equalToConstant: 50),
-                $0.heightAnchor.constraint(equalToConstant: 50)
+                $0.widthAnchor.constraint(equalToConstant: 90),
+                $0.heightAnchor.constraint(equalToConstant: 90)
             ])
         }
         
@@ -82,7 +83,7 @@ final class MovieListCell: UICollectionViewCell {
             contentView.addSubview($0)
             
             NSLayoutConstraint.activate([
-                $0.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+                $0.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
                 $0.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
                 $0.leadingAnchor.constraint(equalTo: posterImageView.trailingAnchor, constant: 8)
             ])
@@ -112,7 +113,7 @@ final class MovieListCell: UICollectionViewCell {
                                     placeholderImage: nil)
 
         if let releaseDate = model.releaseDate {
-            dateLabel.text = releaseDate.formatted(date: .omitted, time: .shortened)
+            dateLabel.text = releaseDate.toYear()
         }
         
         return self

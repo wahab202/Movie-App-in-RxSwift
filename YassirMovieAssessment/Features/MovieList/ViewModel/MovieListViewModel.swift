@@ -19,10 +19,13 @@ final class MovieListViewModel {
 }
 
 extension MovieListViewModel {
-    struct Input {}
+    struct Input {
+        let selection: Driver<IndexPath>
+    }
     
     struct Output {
         let sections: Driver<[MovieListSection]>
+        let navigation: Driver<MovieListCoordinator.Route>
     }
     
     func transform(input: Input) -> Output {
@@ -33,7 +36,8 @@ extension MovieListViewModel {
             return movieList.results.map {
                 MovieListCellModel(title: $0.title,
                                    releaseDate: $0.releaseDate.toDate(),
-                                   imageUrl: $0.posterPath)
+                                   imageUrl: $0.posterPath,
+                                   id: $0.id)
             }
         }
         
@@ -41,6 +45,19 @@ extension MovieListViewModel {
              return [ MovieListSection(items: movieItems)]
         }.asDriver(onErrorDriveWith: .empty())
         
-        return Output(sections: sections)
+        let navigation = input.selection
+            .asObservable()
+            .withLatestFrom(sections) { idx, sections in
+                sections[idx.section].items[idx.item]
+            }
+            .flatMapLatest { item -> Observable<MovieListCoordinator.Route> in
+                return Observable.just(MovieListCoordinator.Route.movieDetail(id: item.id))
+            }
+            .asDriver(onErrorDriveWith: .empty())
+        
+        return Output(
+            sections: sections,
+            navigation: navigation
+        )
     }
 }

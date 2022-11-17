@@ -21,7 +21,6 @@ class NetworkManager {
                                      parameters: params)
             
             request.responseDecodable(of: dto.self) { (response) in
-                print(response)
                 switch response.result {
                 case .success(let data):
                     observer.onNext(data)

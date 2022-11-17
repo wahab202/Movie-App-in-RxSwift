@@ -8,8 +8,8 @@
 import Foundation
 
 struct MovieListCellModel {
-    let title: String
+    let title: String?
     let releaseDate: Date?
-    let imageUrl: String
+    let imageUrl: String?
     let id: Int
 }

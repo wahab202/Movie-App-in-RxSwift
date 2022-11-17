@@ -25,7 +25,11 @@ extension MovieListViewModel {
     
     struct Output {
         let sections: Driver<[MovieListSection]>
-        let navigation: Driver<MovieListCoordinator.Route>
+        let navigation: Driver<Route>
+    }
+    
+    enum Route {
+        case movieDetail(id: Int)
     }
     
     func transform(input: Input) -> Output {
@@ -35,7 +39,7 @@ extension MovieListViewModel {
         let items = movieList.map { movieList -> [MovieListCellModel] in
             return movieList.results.map {
                 MovieListCellModel(title: $0.title,
-                                   releaseDate: $0.releaseDate.toDate(),
+                                   releaseDate: $0.releaseDate?.toDate(),
                                    imageUrl: $0.posterPath,
                                    id: $0.id)
             }
@@ -50,8 +54,8 @@ extension MovieListViewModel {
             .withLatestFrom(sections) { idx, sections in
                 sections[idx.section].items[idx.item]
             }
-            .flatMapLatest { item -> Observable<MovieListCoordinator.Route> in
-                return Observable.just(MovieListCoordinator.Route.movieDetail(id: item.id))
+            .flatMapLatest { item -> Observable<Route> in
+                return Observable.just(.movieDetail(id: item.id))
             }
             .asDriver(onErrorDriveWith: .empty())
         

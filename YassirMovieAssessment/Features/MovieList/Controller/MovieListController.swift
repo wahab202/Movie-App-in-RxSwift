@@ -10,17 +10,18 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-class MovieListController: UIViewController {
+class MovieListController: UIViewController, MovieListCoordinator {
+    
+    var root: UIViewController {
+        return self
+    }
     
     private var cv: UICollectionView!
     private let bag: DisposeBag
     private let vm: MovieListViewModel
-    private let coordinator: MovieListCoordinator
     
-    init(vm: MovieListViewModel = MovieListViewModel(),
-         coordinator: MovieListCoordinator = MovieListCoordinator()) {
+    init(vm: MovieListViewModel = MovieListViewModel()) {
         self.vm = vm
-        self.coordinator = coordinator
         self.bag = DisposeBag()
         
         super.init(nibName: nil, bundle: nil)
@@ -37,16 +38,8 @@ class MovieListController: UIViewController {
     }
     
     private func setupView() {
+        setNavbarAppearance()
         view.backgroundColor = .systemBackground
-        if #available(iOS 13.0, *) {
-            let navBarAppearance = UINavigationBarAppearance()
-            navBarAppearance.configureWithOpaqueBackground()
-            navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-            navBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
-            navBarAppearance.backgroundColor = .orange
-            navigationController?.navigationBar.standardAppearance = navBarAppearance
-            navigationController?.navigationBar.scrollEdgeAppearance = navBarAppearance
-        }
         title = "Movies"
                 
         let layout = createLayout()
@@ -92,9 +85,9 @@ class MovieListController: UIViewController {
         disposables.forEach { $0.disposed(by: bag) }
     }
     
-    private var navigationBinder: Binder<MovieListCoordinator.Route> {
+    private var navigationBinder: Binder<MovieListViewModel.Route> {
         return Binder(self) { host, route in
-            host.coordinator.navigate(to: route)
+            host.navigate(to: route)
             
             // deselecting items in collectionCiew
             if let selectedItems = host.cv.indexPathsForSelectedItems {
@@ -134,5 +127,18 @@ private extension MovieListController {
         section.interGroupSpacing = 8
         
         return UICollectionViewCompositionalLayout(section: section)
+    }
+    
+    private func setNavbarAppearance() {
+        if #available(iOS 13.0, *) {
+            let navBarAppearance = UINavigationBarAppearance()
+            navBarAppearance.configureWithOpaqueBackground()
+            navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+            navBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+            navBarAppearance.backgroundColor = .orange
+            navigationController?.navigationBar.tintColor = .white
+            navigationController?.navigationBar.standardAppearance = navBarAppearance
+            navigationController?.navigationBar.scrollEdgeAppearance = navBarAppearance
+        }
     }
 }

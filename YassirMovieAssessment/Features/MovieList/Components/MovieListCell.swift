@@ -109,8 +109,10 @@ final class MovieListCell: UICollectionViewCell {
     
     func bind(model: MovieListCellModel) -> Self {
         titleLabel.text = model.title
-        posterImageView.sd_setImage(with: URL(string: "\(Constants.imageUrl)\(model.imageUrl)"),
-                                    placeholderImage: nil)
+        if let imageUrl = model.imageUrl {
+            posterImageView.sd_setImage(with: URL(string: "\(Constants.imageUrl)\(imageUrl)"),
+                                        placeholderImage: nil)
+        }
 
         if let releaseDate = model.releaseDate {
             dateLabel.text = releaseDate.toYear()

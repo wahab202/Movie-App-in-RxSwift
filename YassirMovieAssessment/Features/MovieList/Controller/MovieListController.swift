@@ -34,7 +34,17 @@ class MovieListController: UIViewController {
     }
     
     private func setupView() {
-        navigationItem.title = "Movies"
+        view.backgroundColor = .systemBackground
+        if #available(iOS 13.0, *) {
+            let navBarAppearance = UINavigationBarAppearance()
+            navBarAppearance.configureWithOpaqueBackground()
+            navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+            navBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+            navBarAppearance.backgroundColor = .orange
+            navigationController?.navigationBar.standardAppearance = navBarAppearance
+            navigationController?.navigationBar.scrollEdgeAppearance = navBarAppearance
+        }
+        title = "Movies"
                 
         let layout = createLayout()
         
@@ -49,9 +59,9 @@ class MovieListController: UIViewController {
             
             NSLayoutConstraint.activate([
                 $0.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-                $0.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-                $0.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-                $0.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+                $0.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                $0.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                $0.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ])
         }
     }

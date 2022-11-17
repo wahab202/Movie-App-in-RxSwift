@@ -9,16 +9,17 @@ import Foundation
 import UIKit
 import RxSwift
 import RxCocoa
+import SDWebImage
 
 final class MovieListCell: UICollectionViewCell {
     
     private enum Constants {
-        static let logoSize: CGFloat = 48.0
-        static let titleContainerMinHeight: CGFloat = 40.0
+        static let imageUrl: String = "https://image.tmdb.org/t/p/w500/"
     }
     
     private unowned var titleLabel: UILabel!
     private unowned var dateLabel: UILabel!
+    private unowned var posterImageView: UIImageView!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -55,19 +56,35 @@ final class MovieListCell: UICollectionViewCell {
     
     private func setup() {
         contentView.also {
-            $0.backgroundColor = .lightGray
+            $0.backgroundColor = .lightGray.withAlphaComponent(0.3)
             $0.clipsToBounds = true
             $0.layer.cornerRadius = 8
         }
         
-        let container = UIStackView().also {
-            $0.axis = .vertical
+        posterImageView = UIImageView().also {
+            $0.contentMode = .scaleAspectFit
+            
             $0.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview($0)
             
             NSLayoutConstraint.activate([
                 $0.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-                $0.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8)
+                $0.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+                $0.widthAnchor.constraint(equalToConstant: 50),
+                $0.heightAnchor.constraint(equalToConstant: 50)
+            ])
+        }
+        
+        let container = UIStackView().also {
+            $0.axis = .vertical
+            $0.spacing = 4
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            contentView.addSubview($0)
+            
+            NSLayoutConstraint.activate([
+                $0.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+                $0.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                $0.leadingAnchor.constraint(equalTo: posterImageView.trailingAnchor, constant: 8)
             ])
         }
         
@@ -82,7 +99,7 @@ final class MovieListCell: UICollectionViewCell {
         dateLabel = UILabel().also {
             $0.font = .systemFont(ofSize: 14)
             $0.textColor = .gray
-            $0.numberOfLines = 2
+            $0.numberOfLines = 1
             
             container.addArrangedSubview($0)
         }
@@ -91,6 +108,9 @@ final class MovieListCell: UICollectionViewCell {
     
     func bind(model: MovieListCellModel) -> Self {
         titleLabel.text = model.title
+        posterImageView.sd_setImage(with: URL(string: "\(Constants.imageUrl)\(model.imageUrl)"),
+                                    placeholderImage: nil)
+
         if let releaseDate = model.releaseDate {
             dateLabel.text = releaseDate.formatted(date: .omitted, time: .shortened)
         }

@@ -1,7 +1,7 @@
 # Yassir movie assessment by Abdul Wahab
 ### Frameworks and Tools used:
 - Xcode 14
-- Rxswift
+- RxSwift
 - RxCocoa
 - Alamofire
 - SDWebImage

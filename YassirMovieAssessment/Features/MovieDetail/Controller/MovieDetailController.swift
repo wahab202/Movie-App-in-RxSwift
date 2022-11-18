@@ -124,6 +124,7 @@ class MovieDetailController: UIViewController {
         let disposables = [
             output.description.drive(movieDescriptionLabel.rx.text),
             output.title.drive(movieTitleLabel.rx.text),
+            output.title.drive(rx.title),
             output.posterURL.drive(posterBinder),
             output.error.drive(errorBinder),
             output.loading.drive(indicator.rx.isAnimating)

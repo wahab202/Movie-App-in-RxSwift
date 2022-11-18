@@ -7,4 +7,5 @@
 - SDWebImage
 
 ## Screenshots
-![alt text](https://github.com/[username]/[reponame]/blob/[branch]/screenshot1.jpg?raw=true)
+![movie list](screenshot1.png)
+![movie detail](screenshot2.png)

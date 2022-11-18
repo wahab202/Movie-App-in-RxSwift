@@ -16,7 +16,8 @@ class MovieListController: UIViewController, MovieListCoordinator {
         return self
     }
     
-    private var cv: UICollectionView!
+    private unowned var cv: UICollectionView!
+    private unowned var indicator: UIActivityIndicatorView!
     private let bag: DisposeBag
     private let vm: MovieListViewModel
     
@@ -60,6 +61,19 @@ class MovieListController: UIViewController, MovieListCoordinator {
                 $0.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ])
         }
+        
+        indicator = UIActivityIndicatorView().also {
+            $0.startAnimating()
+            $0.hidesWhenStopped = true
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+            NSLayoutConstraint.activate([
+                $0.topAnchor.constraint(equalTo: view.topAnchor),
+                $0.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                $0.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                $0.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            ])
+        }
     }
     
     private func bindViewModel() {
@@ -79,7 +93,9 @@ class MovieListController: UIViewController, MovieListCoordinator {
 
         let disposables = [
             output.sections.drive(cv.rx.items(dataSource: dataSource)),
-            output.navigation.drive(navigationBinder)
+            output.navigation.drive(navigationBinder),
+            output.error.drive(errorBinder),
+            output.loading.drive(indicator.rx.isAnimating)
         ]
 
         disposables.forEach { $0.disposed(by: bag) }
@@ -93,6 +109,15 @@ class MovieListController: UIViewController, MovieListCoordinator {
             if let selectedItems = host.cv.indexPathsForSelectedItems {
                 for indexPath in selectedItems { host.cv.deselectItem(at: indexPath, animated: true) }
             }
+        }
+    }
+    
+    private var errorBinder: Binder<String> {
+        return Binder(self) { host, message in
+            host.indicator.stopAnimating()
+            let alert = UIAlertController(title: "Error", message: message, preferredStyle: UIAlertController.Style.alert)
+            alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
+            host.present(alert, animated: true, completion: nil)
         }
     }
 }

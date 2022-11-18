@@ -12,6 +12,7 @@ import RxCocoa
 final class MovieListViewModel {
     
     private let movieListRepository: MovieListRepository
+    private let bag = DisposeBag()
         
     init(movieListRepository: MovieListRepository = MovieListRepository()) {
         self.movieListRepository = movieListRepository
@@ -25,6 +26,8 @@ extension MovieListViewModel {
     
     struct Output {
         let sections: Driver<[MovieListSection]>
+        let error: Driver<String>
+        let loading: Driver<Bool>
         let navigation: Driver<Route>
     }
     
@@ -33,6 +36,8 @@ extension MovieListViewModel {
     }
     
     func transform(input: Input) -> Output {
+        let errorRelay = PublishRelay<String>()
+        
         let movieList = movieListRepository
             .fetchMovieList()
         
@@ -59,8 +64,20 @@ extension MovieListViewModel {
             }
             .asDriver(onErrorDriveWith: .empty())
         
+        movieList.subscribe(onError: { error in
+            errorRelay.accept(error.localizedDescription)
+        }).disposed(by: bag)
+        
+        let error = errorRelay
+            .asDriver(onErrorDriveWith: .empty())
+        
+        let loading = movieList.map { _ in return false }
+            .asDriver(onErrorDriveWith: .empty())
+        
         return Output(
             sections: sections,
+            error: error,
+            loading: loading,
             navigation: navigation
         )
     }

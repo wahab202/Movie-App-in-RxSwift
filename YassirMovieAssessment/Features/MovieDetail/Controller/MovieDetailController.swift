@@ -15,9 +15,10 @@ class MovieDetailController: UIViewController {
     
     private let bag: DisposeBag
     private let vm: MovieDetailViewModel
-    private var posterImageView: UIImageView!
-    private var movieTitleLabel: UILabel!
-    private var movieDescriptionLabel: UILabel!
+    private unowned var posterImageView: UIImageView!
+    private unowned var movieTitleLabel: UILabel!
+    private unowned var movieDescriptionLabel: UILabel!
+    private unowned var indicator: UIActivityIndicatorView!
     
     init(vm: MovieDetailViewModel) {
         self.vm = vm
@@ -100,6 +101,19 @@ class MovieDetailController: UIViewController {
                 $0.bottomAnchor.constraint(equalTo: descriptionHolder.bottomAnchor)
             ])
         }
+        
+        indicator = UIActivityIndicatorView().also {
+            $0.startAnimating()
+            $0.hidesWhenStopped = true
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+            NSLayoutConstraint.activate([
+                $0.topAnchor.constraint(equalTo: view.topAnchor),
+                $0.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                $0.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                $0.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            ])
+        }
     }
     
     private func bindViewModel() {
@@ -110,7 +124,9 @@ class MovieDetailController: UIViewController {
         let disposables = [
             output.description.drive(movieDescriptionLabel.rx.text),
             output.title.drive(movieTitleLabel.rx.text),
-            output.posterURL.drive(posterBinder)
+            output.posterURL.drive(posterBinder),
+            output.error.drive(errorBinder),
+            output.loading.drive(indicator.rx.isAnimating)
         ]
 
         disposables.forEach { $0.disposed(by: bag) }
@@ -119,6 +135,15 @@ class MovieDetailController: UIViewController {
     private var posterBinder: Binder<String> {
         return Binder(posterImageView) { imageView, url in
             imageView.sd_setImage(with: URL(string: url), placeholderImage: nil)
+        }
+    }
+    
+    private var errorBinder: Binder<String> {
+        return Binder(self) { host, message in
+            host.indicator.stopAnimating()
+            let alert = UIAlertController(title: "Error", message: message, preferredStyle: UIAlertController.Style.alert)
+            alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
+            host.present(alert, animated: true, completion: nil)
         }
     }
 }

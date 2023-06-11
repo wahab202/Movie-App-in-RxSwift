@@ -120,7 +120,7 @@ class MovieDetailController: UIViewController {
         let input = MovieDetailViewModel.Input()
 
         let output = vm.transform(input: input)
-        let a = "hello"
+        let a = "hello eworld"
         
         let disposables = [
             output.description.drive(movieDescriptionLabel.rx.text),
